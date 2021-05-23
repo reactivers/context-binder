@@ -1,51 +1,122 @@
-> # @reactivers/hooks
+> # @reactivers/context-binder
 
-[![npm version](https://badge.fury.io/js/@reactivers%2Fhooks.svg)](//www.npmjs.com/package/@reactivers/hooks)
+[![npm version](https://badge.fury.io/js/@reactivers%2Fcontext-binder.svg)](//www.npmjs.com/package/@reactivers/context-binder)
 
 # Welcome
 
 ## Introduction
 
-> ```@reactivers/hooks``` provides some awesome hooks that may make development easier for you.
-It contains the hooks which are probably doesn't exist in the libraries that you use.
-
-## Docs
-You can find detailed docs [here](https://hooks.reactivers.com)
+> ```@reactivers/context-binder``` provides to use ```context``` in a component without unnecesseary rerenders.
 
 ## Getting Started
 
 ### Installation
 
 ```bash
-npm install --save @reactivers/hooks
+npm install --save @reactivers/context-binder
 
-yarn add @reactivers/hooks
+yarn add @reactivers/context-binder
 ```
 
-## Content
+# Usage
 
-- [useAuth](https://hooks.reactivers.com/use-auth)
-- [useClickInside](https://hooks.reactivers.com/use-click-inside)
-- [useClickOutside](https://hooks.reactivers.com/use-click-outside)
-- [useCookie](https://hooks.reactivers.com/use-cookie)
-- [useCounter](https://hooks.reactivers.com/use-counter)
-- [useDelete](https://hooks.reactivers.com/use-fetch)
-- [useDimensions](https://hooks.reactivers.com/use-dimensions)
-- [useEventListener](https://hooks.reactivers.com/use-event-listener)
-- [useFetch](https://hooks.reactivers.com/use-fetch)
-- [useGet](https://hooks.reactivers.com/use-fetch)
-- [useGlobalState](https://hooks.reactivers.com/use-global-state)
-- [useHover](https://hooks.reactivers.com/use-hover)
-- [useLoading](https://hooks.reactivers.com/use-loading)
-- [useLocales](https://hooks.reactivers.com/use-locales)
-- [useLocalStorage](https://hooks.reactivers.com/use-local-storage)
-- [useMeasure](https://hooks.reactivers.com/use-measure)
-- [useMounted](https://hooks.reactivers.com/use-mounted)
-- [usePost](https://hooks.reactivers.com/use-fetch)
-- [usePrevious](https://hooks.reactivers.com/use-previous)
-- [usePut](https://hooks.reactivers.com/use-fetch)
-- [useSafeArea](https://hooks.reactivers.com/use-safe-area)
-- [useSocket](https://hooks.reactivers.com/use-socket)
-- [useTheme](https://hooks.reactivers.com/use-theme)
-- [useTitle](https://hooks.reactivers.com/use-title)
-- [useUtils](https://hooks.reactivers.com/use-utils)
+```tsx
+
+import { createContext, FC, useCallback, useState } from 'react';
+import { ContextBinder } from '@reactivers/context-binder';
+
+interface Counter {
+  counter: number;
+  increase: () => void;
+  decrease: () => void;
+}
+
+const CounterContext = createContext<Counter>({} as Counter);
+
+const CounterProvider: FC = ({ children }) => {
+  const [counter, setCounter] = useState(0);
+
+  const increase = useCallback(() => {
+    setCounter(old => old + 1)
+  }, [])
+
+  const decrease = useCallback(() => {
+    setCounter(old => old - 1)
+  }, [])
+
+  return (
+    <CounterContext.Provider value={{
+      counter,
+      increase,
+      decrease
+    }}>
+      {children}
+    </CounterContext.Provider>
+  )
+
+}
+
+const App = () => {
+  return (
+    <div className="sample-page center">
+      <div style={{ textAlign: 'center' }}>
+        <CounterText />
+        <DecreaseButton />
+        <IncreaseButton />
+      </div>
+    </div>
+  );
+}
+
+const CounterText = ContextBinder(
+  CounterContext,
+  {
+    counter: c => c.counter
+  },
+  ({ context }) => {
+    const { counter } = context;
+    console.log("Counter render")
+    return (
+      <h1>Counter: {counter}</h1>
+    )
+  }
+)
+
+const DecreaseButton = ContextBinder(
+  CounterContext, {
+  decrease: c => c.decrease
+}, ({ context }) => {
+  const { decrease } = context;
+  console.log("DecreaseButton render")
+  return (
+    <button onClick={decrease}>Decrease</button>
+  )
+}
+)
+
+const IncreaseButton = ContextBinder(
+  CounterContext,
+  {
+    increase: c => c.increase
+  }
+  , ({ context }) => {
+    const { increase } = context;
+    console.log("IncreaseButton render")
+    return (
+      <button onClick={increase}>Increase</button>
+    )
+  }
+)
+
+const AppWrapper = () => {
+  return (
+    <CounterProvider>
+      <App />
+    </CounterProvider>
+  )
+}
+
+export default AppWrapper;
+
+
+```

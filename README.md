@@ -20,6 +20,8 @@ yarn add @reactivers/context-binder
 
 # Usage
 
+## Open in [CodeSandbox](https://codesandbox.io/s/react-context-binder-with-reactiverscontext-binder-wd1e5)
+
 ```tsx
 
 import { createContext, FC, useCallback, useState } from 'react';
@@ -117,6 +119,5 @@ const AppWrapper = () => {
 }
 
 export default AppWrapper;
-
 
 ```
